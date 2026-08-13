@@ -12,6 +12,7 @@ from pymodbus.client import ModbusSerialClient
 
 from .config import ConfigError, load_config
 from .discovery import discovery_messages, encode
+from .mqtt import publish_retained
 from .service import poll_once
 
 
@@ -21,9 +22,7 @@ class MqttPublisher:
         self.topic_prefix = topic_prefix
 
     def publish_state(self, name: str, value: object) -> None:
-        result = self.client.publish(f"{self.topic_prefix}/{name}/state", str(value).lower(), retain=True)
-        if result.rc != mqtt.MQTT_ERR_SUCCESS:
-            raise RuntimeError(f"MQTT publish failed for {name}: rc={result.rc}")
+        publish_retained(self.client, f"{self.topic_prefix}/{name}/state", str(value).lower())
 
 
 def _client(config: dict) -> ModbusSerialClient:
@@ -71,8 +70,8 @@ def run(ctx: click.Context, once: bool) -> None:
             discovery_prefix=mc["discovery_prefix"], topic_prefix=mc["topic_prefix"],
             device_name=mc["device_name"], device_identifier=mc["device_identifier"],
         ):
-            client.publish(topic, encode(payload), retain=True)
-        client.publish(f"{mc['topic_prefix']}/availability", "online", retain=True)
+            publish_retained(client, topic, encode(payload))
+        publish_retained(client, f"{mc['topic_prefix']}/availability", "online")
         modbus = _client(config)
         if not modbus.connect():
             raise click.ClickException(f"cannot open Modbus device {config['modbus']['device']}")
