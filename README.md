@@ -2,7 +2,11 @@
 
 A small, local and **read-only** Modbus RTU telemetry bridge for heat pumps. It publishes retained MQTT state and Home Assistant MQTT Discovery configuration.
 
-The initial register map is based on a verified legacy installation using Modbus RTU at 9600 8N1, unit ID 1 and holding registers 117–136. Its concrete heat-pump model should be recorded in the deployment documentation, rather than encoded in this reusable project name.
+## Compatibility
+
+The initial deployment and live Modbus verification are for an **ARGOS EN MO160**. The same controller/BMS register map is intended for the related **ARGOS EN MO100** variants as well. Before deploying to another unit, confirm its controller BMS documentation, Modbus unit ID, serial framing, and the read-only register map with a no-write probe.
+
+The initial register map uses Modbus RTU at 9600 8N1, unit ID 1 and holding registers 117–136.
 
 ## Safety model
 
