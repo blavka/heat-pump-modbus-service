@@ -1,0 +1,21 @@
+[project]
+name = "heat-pump-modbus-service"
+version = "0.1.0"
+description = "Read-only Modbus RTU telemetry bridge for heat pumps"
+requires-python = ">=3.11"
+dependencies = [
+  "click>=8.1",
+  "paho-mqtt>=2.1",
+  "pymodbus>=3.7,<4",
+  "PyYAML>=6.0",
+]
+
+[project.scripts]
+heat-pump-modbus-service = "heat_pump_modbus_service.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
