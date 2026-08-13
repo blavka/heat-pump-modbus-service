@@ -16,6 +16,7 @@ class ConfigError(ValueError):
 DEFAULTS: dict[str, Any] = {
     "modbus": {"device": "/dev/heat-pump", "unit_id": 1, "baudrate": 9600, "bytesize": 8, "parity": "N", "stopbits": 1, "timeout_seconds": 3},
     "mqtt": {"host": "127.0.0.1", "port": 1883, "topic_prefix": "heat_pump/utility_room", "discovery_prefix": "homeassistant", "device_name": "Heat Pump", "device_identifier": "heat_pump_utility_room"},
+    "telemetry": {"excluded": []},
     "runtime": {"poll_interval_seconds": 30, "log_level": "INFO"},
 }
 
@@ -45,6 +46,10 @@ def load_config(path: Path) -> dict[str, Any]:
         raise ConfigError("modbus.device must be an absolute /dev path")
     if modbus["unit_id"] < 1 or modbus["unit_id"] > 247:
         raise ConfigError("modbus.unit_id must be between 1 and 247")
+    if not isinstance(config["telemetry"]["excluded"], list) or any(
+        not isinstance(name, str) for name in config["telemetry"]["excluded"]
+    ):
+        raise ConfigError("telemetry.excluded must be a list of telemetry names")
     if config["runtime"]["poll_interval_seconds"] < 5:
         raise ConfigError("runtime.poll_interval_seconds must be at least 5")
     return config

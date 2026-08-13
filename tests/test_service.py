@@ -8,10 +8,24 @@ class Response:
         return False
 
 
+class CoilResponse:
+    bits = [False] * 192
+
+    def isError(self):
+        return False
+
+
 class Client:
     def read_holding_registers(self, *, address, count, device_id):
         assert (address, count, device_id) == (117, 20, 1)
         return Response()
+
+    def read_coils(self, *, address, count, device_id):
+        assert (address, count, device_id) == (0, 176, 1)
+        response = CoilResponse()
+        response.bits[80] = True
+        response.bits[175] = True
+        return response
 
 
 class Publisher:
@@ -29,4 +43,6 @@ def test_poll_once_reads_known_range_and_publishes_decoded_values():
 
     assert ("unit_status", "off") in publisher.published
     assert ("outdoor_temperature", 26.4) in publisher.published
+    assert ("compressor_running", True) in publisher.published
+    assert ("heat_pump_water_pump_running", True) in publisher.published
     assert all(name != "disinfection" for name, _value in publisher.published)

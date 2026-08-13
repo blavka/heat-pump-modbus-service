@@ -7,11 +7,14 @@ def test_discovery_publishes_temperature_and_status_entities_only():
         topic_prefix="heat_pump/utility_room",
         device_name="Heat Pump",
         device_identifier="heat_pump_utility_room",
+        excluded={"thermostat", "remote_room_temperature"},
     )
 
     topics = {topic for topic, _payload in messages}
     assert "homeassistant/sensor/heat_pump_utility_room_outdoor_temperature/config" in topics
     assert "homeassistant/sensor/heat_pump_utility_room_unit_status/config" in topics
+    assert "homeassistant/sensor/heat_pump_utility_room_thermostat/config" not in topics
+    assert "homeassistant/sensor/heat_pump_utility_room_remote_room_temperature/config" not in topics
     assert all("disinfection" not in topic for topic in topics)
 
     outdoor_payload = dict(messages)[

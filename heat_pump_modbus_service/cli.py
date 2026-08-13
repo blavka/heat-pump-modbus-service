@@ -13,6 +13,7 @@ from pymodbus.client import ModbusSerialClient
 from .config import ConfigError, load_config
 from .discovery import discovery_messages, encode
 from .mqtt import publish_retained
+from .registers import _TEMPERATURES
 from .service import poll_once
 
 
@@ -69,6 +70,7 @@ def run(ctx: click.Context, once: bool) -> None:
         for topic, payload in discovery_messages(
             discovery_prefix=mc["discovery_prefix"], topic_prefix=mc["topic_prefix"],
             device_name=mc["device_name"], device_identifier=mc["device_identifier"],
+            excluded=set(config["telemetry"]["excluded"]),
         ):
             publish_retained(client, topic, encode(payload))
         publish_retained(client, f"{mc['topic_prefix']}/availability", "online")
@@ -77,7 +79,10 @@ def run(ctx: click.Context, once: bool) -> None:
             raise click.ClickException(f"cannot open Modbus device {config['modbus']['device']}")
         try:
             while True:
-                poll_once(modbus, config["modbus"]["unit_id"], publisher)
+                poll_once(
+                    modbus, config["modbus"]["unit_id"], publisher,
+                    excluded=set(config["telemetry"]["excluded"]),
+                )
                 logger.info("published heat-pump telemetry")
                 if once:
                     break

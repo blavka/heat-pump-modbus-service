@@ -18,6 +18,13 @@ mqtt:
   device_name: Heat Pump
   device_identifier: heat_pump_utility_room
 
+# Hide unsupported/unneeded values both from MQTT state publication and HA Discovery.
+# Existing retained Discovery topics are cleared during service start.
+telemetry:
+  excluded:
+    - thermostat
+    - remote_room_temperature
+
 runtime:
   poll_interval_seconds: 30
   log_level: INFO
