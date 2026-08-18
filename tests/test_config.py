@@ -20,12 +20,12 @@ mqtt:
     config = load_config(config_file)
 
     assert config["modbus"]["baudrate"] == 9600
-    assert config["runtime"]["poll_interval_seconds"] == 30
+    assert config["runtime"]["poll_interval_seconds"] == 5
+    assert config["telemetry"]["temperature_diff"] == 0.2
 
 
-def test_rejects_any_write_control_configuration(tmp_path: Path):
+def test_accepts_explicit_control_enablement(tmp_path: Path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text("control:\n  enabled: true\n")
 
-    with pytest.raises(ConfigError, match="read-only"):
-        load_config(config_file)
+    assert load_config(config_file)["control"]["enabled"] is True

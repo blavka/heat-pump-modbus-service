@@ -12,6 +12,7 @@ from .states import RUNTIME_STATE_BITS
 def discovery_messages(
     *, discovery_prefix: str, topic_prefix: str, device_name: str, device_identifier: str,
     excluded: set[str] | None = None,
+    controls_enabled: bool = False,
 ) -> list[tuple[str, dict[str, Any]]]:
     excluded = excluded or set()
     device = {"identifiers": [device_identifier], "name": device_name, "manufacturer": "Local Modbus RTU"}
@@ -56,6 +57,24 @@ def discovery_messages(
             "device": device,
         }
         messages.append((f"{discovery_prefix}/sensor/{device_identifier}_{name}/config", payload))
+    if controls_enabled:
+        controls = (
+            ("switch", "main_operation", {"payload_on": "on", "payload_off": "off"}),
+            ("switch", "quiet_mode", {"payload_on": "on", "payload_off": "off"}),
+            ("switch", "heat_hot_water_priority", {"payload_on": "on", "payload_off": "off"}),
+            ("select", "operation_mode", {"options": ["heat", "hot_water", "heat_and_hot_water"]}),
+        )
+        for domain, name, extra in controls:
+            payload = {
+                "name": name.replace("_", " ").title(),
+                "unique_id": f"{device_identifier}_{name}",
+                "state_topic": f"{topic_prefix}/{name}/state",
+                "command_topic": f"{topic_prefix}/{name}/set",
+                "availability_topic": f"{topic_prefix}/availability",
+                "device": device,
+                **extra,
+            }
+            messages.append((f"{discovery_prefix}/{domain}/{device_identifier}_{name}/config", payload))
     return messages
 
 

@@ -17,6 +17,14 @@ class CoilResponse:
 
 class Client:
     def read_holding_registers(self, *, address, count, device_id):
+        if (address, count, device_id) == (2, 1, 1):
+            response = Response()
+            response.registers = [2]
+            return response
+        if (address, count, device_id) == (42, 1, 1):
+            response = Response()
+            response.registers = [0x55]
+            return response
         assert (address, count, device_id) == (117, 20, 1)
         return Response()
 
@@ -45,4 +53,8 @@ def test_poll_once_reads_known_range_and_publishes_decoded_values():
     assert ("outdoor_temperature", 26.4) in publisher.published
     assert ("compressor_running", True) in publisher.published
     assert ("heat_pump_water_pump_running", True) in publisher.published
+    assert ("main_operation", "off") in publisher.published
+    assert ("operation_mode", "hot_water") in publisher.published
+    assert ("quiet_mode", "off") in publisher.published
+    assert ("heat_hot_water_priority", "off") in publisher.published
     assert all(name != "disinfection" for name, _value in publisher.published)

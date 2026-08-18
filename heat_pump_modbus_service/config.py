@@ -1,4 +1,4 @@
-"""Validated, deliberately read-only service configuration."""
+"""Validated heat-pump telemetry and explicitly enabled control configuration."""
 
 from __future__ import annotations
 
@@ -16,8 +16,9 @@ class ConfigError(ValueError):
 DEFAULTS: dict[str, Any] = {
     "modbus": {"device": "/dev/heat-pump", "unit_id": 1, "baudrate": 9600, "bytesize": 8, "parity": "N", "stopbits": 1, "timeout_seconds": 3},
     "mqtt": {"host": "127.0.0.1", "port": 1883, "topic_prefix": "heat_pump/utility_room", "discovery_prefix": "homeassistant", "device_name": "Heat Pump", "device_identifier": "heat_pump_utility_room"},
-    "telemetry": {"excluded": []},
-    "runtime": {"poll_interval_seconds": 30, "log_level": "INFO"},
+    "telemetry": {"excluded": [], "temperature_diff": 0.2},
+    "control": {"enabled": False},
+    "runtime": {"poll_interval_seconds": 5, "log_level": "INFO"},
 }
 
 
@@ -38,8 +39,8 @@ def load_config(path: Path) -> dict[str, Any]:
         raise ConfigError(f"cannot read configuration: {error}") from error
     if not isinstance(supplied, dict):
         raise ConfigError("configuration root must be a mapping")
-    if "control" in supplied or "write" in supplied:
-        raise ConfigError("this service is read-only; control/write configuration is not supported")
+    if "write" in supplied:
+        raise ConfigError("write configuration is not supported; use control.enabled")
     config = _merge(DEFAULTS, supplied)
     modbus = config["modbus"]
     if not isinstance(modbus["device"], str) or not modbus["device"].startswith("/dev/"):
@@ -50,6 +51,10 @@ def load_config(path: Path) -> dict[str, Any]:
         not isinstance(name, str) for name in config["telemetry"]["excluded"]
     ):
         raise ConfigError("telemetry.excluded must be a list of telemetry names")
+    if not isinstance(config["telemetry"]["temperature_diff"], (int, float)) or config["telemetry"]["temperature_diff"] < 0:
+        raise ConfigError("telemetry.temperature_diff must be a non-negative number")
+    if not isinstance(config["control"]["enabled"], bool):
+        raise ConfigError("control.enabled must be true or false")
     if config["runtime"]["poll_interval_seconds"] < 5:
         raise ConfigError("runtime.poll_interval_seconds must be at least 5")
     return config

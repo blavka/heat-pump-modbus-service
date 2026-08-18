@@ -1,5 +1,5 @@
 # Copy to config/local.yaml; that deployment-specific file is not tracked.
-# This service intentionally supports telemetry reads only: no Modbus writes exist.
+# Telemetry is always read-only; optional controls require an explicit configuration opt-in.
 modbus:
   # Container-side name; Compose maps a stable physical USB hub port here.
   device: /dev/heat-pump
@@ -24,7 +24,14 @@ telemetry:
   excluded:
     - thermostat
     - remote_room_temperature
+  # UniPi-compatible: publish immediately, then only changes of at least this many °C.
+  temperature_diff: 0.2
+
+# Controls are disabled by default. Set enabled: true only after the BMS protocol and
+# controller behavior have been verified for this installation.
+control:
+  enabled: false
 
 runtime:
-  poll_interval_seconds: 30
+  poll_interval_seconds: 5
   log_level: INFO

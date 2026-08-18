@@ -10,9 +10,12 @@ import click
 import paho.mqtt.client as mqtt
 from pymodbus.client import ModbusSerialClient
 
+from .command_queue import CommandQueue
+from .commands import CommandProcessor
 from .config import ConfigError, load_config
 from .discovery import discovery_messages, encode
 from .mqtt import publish_retained
+from .telemetry_filter import TelemetryFilter
 from .registers import _TEMPERATURES
 from .service import poll_once
 
@@ -66,11 +69,16 @@ def run(ctx: click.Context, once: bool) -> None:
     client.connect(mc["host"], mc["port"], keepalive=60)
     client.loop_start()
     publisher = MqttPublisher(client, mc["topic_prefix"])
+    telemetry_filter = TelemetryFilter(
+        temperature_names={name for name in _TEMPERATURES.values() if "temperature" in name},
+        temperature_diff=config["telemetry"]["temperature_diff"],
+    )
     try:
         for topic, payload in discovery_messages(
             discovery_prefix=mc["discovery_prefix"], topic_prefix=mc["topic_prefix"],
             device_name=mc["device_name"], device_identifier=mc["device_identifier"],
             excluded=set(config["telemetry"]["excluded"]),
+            controls_enabled=config["control"]["enabled"],
         ):
             publish_retained(client, topic, encode(payload))
         publish_retained(client, f"{mc['topic_prefix']}/availability", "online")
@@ -78,15 +86,39 @@ def run(ctx: click.Context, once: bool) -> None:
         if not modbus.connect():
             raise click.ClickException(f"cannot open Modbus device {config['modbus']['device']}")
         try:
+            command_queue: CommandQueue | None = None
+            if config["control"]["enabled"]:
+                processor = CommandProcessor(modbus, config["modbus"]["unit_id"], publisher)
+
+                def handle_command(topic: str, payload: bytes) -> None:
+                    try:
+                        processor.handle(topic, payload)
+                        logger.info("applied heat-pump control command for %s", topic)
+                    except Exception:
+                        logger.exception("rejected heat-pump control command for %s", topic)
+
+                command_queue = CommandQueue(handle_command)
+
+                def on_message(_client, _userdata, message) -> None:
+                    command_queue.enqueue(message.topic, message.payload)
+
+                client.on_message = on_message
+                client.subscribe(f"{mc['topic_prefix']}/+/set", qos=1)
             while True:
+                if command_queue is not None:
+                    command_queue.drain()
                 poll_once(
                     modbus, config["modbus"]["unit_id"], publisher,
                     excluded=set(config["telemetry"]["excluded"]),
+                    telemetry_filter=telemetry_filter,
                 )
                 logger.info("published heat-pump telemetry")
                 if once:
                     break
-                time.sleep(config["runtime"]["poll_interval_seconds"])
+                if command_queue is None:
+                    time.sleep(config["runtime"]["poll_interval_seconds"])
+                else:
+                    command_queue.wait_for_work(config["runtime"]["poll_interval_seconds"])
         finally:
             modbus.close()
     finally:
