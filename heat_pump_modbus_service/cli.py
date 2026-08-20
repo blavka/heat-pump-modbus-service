@@ -26,7 +26,8 @@ class MqttPublisher:
         self.topic_prefix = topic_prefix
 
     def publish_state(self, name: str, value: object) -> None:
-        publish_retained(self.client, f"{self.topic_prefix}/{name}/state", str(value).lower())
+        payload = "on" if value is True else "off" if value is False else str(value).lower()
+        publish_retained(self.client, f"{self.topic_prefix}/{name}/state", payload)
 
 
 def _client(config: dict) -> ModbusSerialClient:
