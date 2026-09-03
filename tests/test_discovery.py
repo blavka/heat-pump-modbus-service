@@ -36,6 +36,7 @@ def test_discovery_adds_only_requested_non_cooling_controls():
 
     assert "homeassistant/switch/heat_pump_utility_room_main_operation/config" in payloads
     assert "homeassistant/switch/heat_pump_utility_room_quiet_mode/config" in payloads
+    assert "homeassistant/switch/heat_pump_utility_room_weather_dependent_control/config" in payloads
     assert "homeassistant/switch/heat_pump_utility_room_heat_hot_water_priority/config" in payloads
     mode = payloads["homeassistant/select/heat_pump_utility_room_operation_mode/config"]
     assert mode["options"] == ["heat", "hot_water", "heat_and_hot_water"]

@@ -18,7 +18,7 @@ The project must publish only confirmed `R` runtime bits by default. No coil wri
 | 19 | Cool+Hot Water Priority | Hot water has priority over cooling | on |
 | 20 | Heat+Hot Water Priority | Hot water has priority over heating | on |
 | 21 | Quiet Mode | Quiet Mode enabled | off |
-| 22 | Weather depend | Weather-dependent control enabled | not yet sampled individually |
+| 22 | Weather depend | Weather-dependent control enabled | off — published to HA and write confirmation support implemented |
 | 23 | Disinfection | Disinfection enabled | not used |
 | 29 | Water Tank | Tank configured/present | on |
 | 33 | Remote sensor | Remote sensor configured/present | expected off here; verify live before documenting as site fact |

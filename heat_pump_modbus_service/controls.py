@@ -59,6 +59,11 @@ def set_quiet_mode(client, unit_id: int, enabled: bool) -> None:
     _write_coil(client, 21, enabled, unit_id)
 
 
+def set_weather_dependent_control(client, unit_id: int, enabled: bool) -> None:
+    """Set documented Weather depend coil 22 and confirm it."""
+    _write_coil(client, 22, enabled, unit_id)
+
+
 def set_heat_hot_water_priority(client, unit_id: int, hot_water_priority: bool) -> None:
     """Set Heat+Hot Water Priority coil 20 only while the heat pump is off."""
     if _read_register(client, 42, unit_id) != MAIN_OPERATION_OFF:

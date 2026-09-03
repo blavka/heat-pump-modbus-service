@@ -32,6 +32,7 @@ def poll_once(client, unit_id: int, publisher, excluded: set[str] | None = None,
         "operation_mode": mode_values.get(control_mode_response.registers[0], f"unknown_{control_mode_response.registers[0]}"),
         "main_operation": "on" if operation == MAIN_OPERATION_ON else "off" if operation == MAIN_OPERATION_OFF else f"unknown_{operation}",
         "quiet_mode": "on" if coil_response.bits[21] else "off",
+        "weather_dependent_control": "on" if coil_response.bits[22] else "off",
         "heat_hot_water_priority": "on" if coil_response.bits[20] else "off",
     })
     values = included_values(values, excluded)

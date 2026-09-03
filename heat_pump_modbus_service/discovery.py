@@ -61,6 +61,7 @@ def discovery_messages(
         controls = (
             ("switch", "main_operation", {"payload_on": "on", "payload_off": "off"}),
             ("switch", "quiet_mode", {"payload_on": "on", "payload_off": "off"}),
+            ("switch", "weather_dependent_control", {"payload_on": "on", "payload_off": "off"}),
             ("switch", "heat_hot_water_priority", {"payload_on": "on", "payload_off": "off"}),
             ("select", "operation_mode", {"options": ["heat", "hot_water", "heat_and_hot_water"]}),
         )

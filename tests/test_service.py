@@ -35,6 +35,7 @@ class Client:
     def read_coils(self, *, address, count, device_id):
         assert (address, count, device_id) == (0, 176, 1)
         response = CoilResponse()
+        response.bits[22] = True
         response.bits[80] = True
         response.bits[175] = True
         return response
@@ -60,6 +61,7 @@ def test_poll_once_reads_known_range_and_publishes_decoded_values():
     assert ("main_operation", "off") in publisher.published
     assert ("operation_mode", "hot_water") in publisher.published
     assert ("quiet_mode", "off") in publisher.published
+    assert ("weather_dependent_control", "on") in publisher.published
     assert ("heat_hot_water_priority", "off") in publisher.published
     assert ("weather_dependent_temperature", 20.5) in publisher.published
     assert all(name != "disinfection" for name, _value in publisher.published)

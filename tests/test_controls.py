@@ -7,6 +7,7 @@ from heat_pump_modbus_service.controls import (
     set_main_operation,
     set_mode,
     set_quiet_mode,
+    set_weather_dependent_control,
 )
 
 
@@ -108,7 +109,7 @@ class ControlClient(OffClient):
     def __init__(self):
         super().__init__()
         self.registers[1] = 2
-        self.coils = {20: True, 21: True}
+        self.coils = {20: True, 21: True, 22: False}
         self.coil_writes = []
 
     def read_coils(self, address, *, count, device_id):
@@ -124,7 +125,8 @@ def test_quiet_mode_and_heating_hot_water_priority_write_and_confirm_when_off():
     client = ControlClient()
 
     set_quiet_mode(client, 1, False)
+    set_weather_dependent_control(client, 1, True)
     set_heat_hot_water_priority(client, 1, False)
 
-    assert client.coil_writes == [(21, False, 1), (20, False, 1)]
-    assert client.coils == {20: False, 21: False}
+    assert client.coil_writes == [(21, False, 1), (22, True, 1), (20, False, 1)]
+    assert client.coils == {20: False, 21: False, 22: True}

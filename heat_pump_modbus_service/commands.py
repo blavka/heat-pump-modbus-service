@@ -7,6 +7,7 @@ from .controls import (
     set_main_operation,
     set_mode,
     set_quiet_mode,
+    set_weather_dependent_control,
 )
 
 
@@ -30,6 +31,12 @@ class CommandProcessor:
                 raise ValueError("quiet mode command must be on or off")
             set_quiet_mode(self.client, self.unit_id, enabled)
             self.publisher.publish_state("quiet_mode", "on" if enabled else "off")
+        elif topic.endswith("/weather_dependent_control/set"):
+            enabled = command == "on"
+            if command not in {"on", "off"}:
+                raise ValueError("weather-dependent control command must be on or off")
+            set_weather_dependent_control(self.client, self.unit_id, enabled)
+            self.publisher.publish_state("weather_dependent_control", "on" if enabled else "off")
         elif topic.endswith("/heat_hot_water_priority/set"):
             enabled = command == "on"
             if command not in {"on", "off"}:
