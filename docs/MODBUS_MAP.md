@@ -54,9 +54,9 @@ Combined configured modes may still prioritize either heating or DHW. Therefore 
 
 ## Weather-dependent target
 
-The operation manual identifies `T-weather depend` as the calculated weather-dependent target temperature shown in the controller's parameter view. It applies for cooling/heating operation, not pure hot-water operation. The live read-only probe returned raw `40`, decoded as `4.0 °C`, while the unit was off. The service polls this register separately and publishes it as `sensor.heat_pump_weather_dependent_temperature`. Confirm the displayed value during active heating before relying on it for dashboards/automations.
+The operation manual identifies `T-weather depend` as the calculated target temperature shown in the controller's parameter view; in Czech heating terminology this is the **ekvitermní cílová teplota**. It applies for cooling/heating operation, not pure hot-water operation. The live read-only probe returned raw `40`, decoded as `4.0 °C`, while the unit was off. The service polls this register separately and publishes it as `sensor.heat_pump_weather_dependent_temperature`. Confirm the displayed value during active heating before relying on it for dashboards/automations.
 
-This is a calculated target. The BMS protocol documents writable/readable coil `22` (`Weather depend`) for enabling or disabling weather-dependent control; Home Assistant exposes it as `switch.heat_pump_weather_dependent_control` and confirms commands by delayed coil read-back. The protocol mapping for the heating curve/setpoints themselves and the TUV setpoint is still not represented in this service.
+This is a calculated target. The BMS protocol documents writable/readable coil `22` (`Weather depend`) for enabling or disabling weather-dependent control; Home Assistant exposes it as `switch.heat_pump_weather_dependent_control` (display name **Ekvitermní regulace**) and confirms commands by delayed coil read-back. The protocol mapping for the heating curve/setpoints themselves and the TUV setpoint is still not represented in this service.
 
 ## Read-only boundary
 

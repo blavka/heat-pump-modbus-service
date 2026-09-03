@@ -9,6 +9,12 @@ from .registers import _TEMPERATURES
 from .states import RUNTIME_STATE_BITS
 
 
+DISPLAY_NAMES = {
+    "weather_dependent_temperature": "Ekvitermní cílová teplota",
+    "weather_dependent_control": "Ekvitermní regulace",
+}
+
+
 def discovery_messages(
     *, discovery_prefix: str, topic_prefix: str, device_name: str, device_identifier: str,
     excluded: set[str] | None = None,
@@ -21,7 +27,7 @@ def discovery_messages(
         if name in excluded:
             continue
         payload: dict[str, Any] = {
-            "name": name.replace("_", " ").title(),
+            "name": DISPLAY_NAMES.get(name, name.replace("_", " ").title()),
             "unique_id": f"{device_identifier}_{name}",
             "state_topic": f"{topic_prefix}/{name}/state",
             "availability_topic": f"{topic_prefix}/availability",
@@ -67,7 +73,7 @@ def discovery_messages(
         )
         for domain, name, extra in controls:
             payload = {
-                "name": name.replace("_", " ").title(),
+                "name": DISPLAY_NAMES.get(name, name.replace("_", " ").title()),
                 "unique_id": f"{device_identifier}_{name}",
                 "state_topic": f"{topic_prefix}/{name}/state",
                 "command_topic": f"{topic_prefix}/{name}/set",
