@@ -10,8 +10,8 @@ from .states import RUNTIME_STATE_BITS
 
 
 DISPLAY_NAMES = {
-    "weather_dependent_temperature": "Ekvitermní cílová teplota",
-    "weather_dependent_control": "Ekvitermní regulace",
+    "weather_dependent_temperature": "Weather-Compensated Target Temperature",
+    "weather_dependent_control": "Weather-Compensated Control",
 }
 
 
