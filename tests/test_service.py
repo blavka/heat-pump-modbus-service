@@ -25,6 +25,10 @@ class Client:
             response = Response()
             response.registers = [0x55]
             return response
+        if (address, count, device_id) == (137, 1, 1):
+            response = Response()
+            response.registers = [205]
+            return response
         assert (address, count, device_id) == (117, 20, 1)
         return Response()
 
@@ -57,4 +61,5 @@ def test_poll_once_reads_known_range_and_publishes_decoded_values():
     assert ("operation_mode", "hot_water") in publisher.published
     assert ("quiet_mode", "off") in publisher.published
     assert ("heat_hot_water_priority", "off") in publisher.published
+    assert ("weather_dependent_temperature", 20.5) in publisher.published
     assert all(name != "disinfection" for name, _value in publisher.published)

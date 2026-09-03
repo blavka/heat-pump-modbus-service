@@ -14,11 +14,18 @@ def poll_once(client, unit_id: int, publisher, excluded: set[str] | None = None,
     coil_response = client.read_coils(address=0, count=COIL_READ_COUNT, device_id=unit_id)
     if coil_response.isError():
         raise RuntimeError(f"Modbus coil read failed: {coil_response}")
+    # Register 137 is the documented calculated weather-dependent target.
+    # It is outside the contiguous 117–136 telemetry range, so read it separately.
+    weather_response = client.read_holding_registers(address=137, count=1, device_id=unit_id)
     control_mode_response = client.read_holding_registers(address=2, count=1, device_id=unit_id)
     operation_response = client.read_holding_registers(address=42, count=1, device_id=unit_id)
-    if control_mode_response.isError() or operation_response.isError():
-        raise RuntimeError("Modbus control-state register read failed")
+    if weather_response.isError() or control_mode_response.isError() or operation_response.isError():
+        raise RuntimeError("Modbus control-state or weather-dependent register read failed")
     values = decode_registers(response.registers) | decode_runtime_states(coil_response.bits)
+    raw_weather_temperature = weather_response.registers[0]
+    values["weather_dependent_temperature"] = (
+        raw_weather_temperature - 65536 if raw_weather_temperature >= 32768 else raw_weather_temperature
+    ) / 10
     mode_values = {1: "heat", 2: "hot_water", 4: "heat_and_hot_water"}
     operation = operation_response.registers[0]
     values.update({

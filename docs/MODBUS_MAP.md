@@ -54,7 +54,9 @@ Combined configured modes may still prioritize either heating or DHW. Therefore 
 
 ## Weather-dependent target
 
-The operation manual identifies `T-weather depend` as the calculated weather-dependent target temperature shown in the controller's parameter view. It applies for cooling/heating operation, not pure hot-water operation. The live read-only probe returned raw `40`, decoded as `4.0 °C`, while the unit was off. Confirm the displayed value during active heating before relying on it for dashboards/automations.
+The operation manual identifies `T-weather depend` as the calculated weather-dependent target temperature shown in the controller's parameter view. It applies for cooling/heating operation, not pure hot-water operation. The live read-only probe returned raw `40`, decoded as `4.0 °C`, while the unit was off. The service polls this register separately and publishes it as `sensor.heat_pump_weather_dependent_temperature`. Confirm the displayed value during active heating before relying on it for dashboards/automations.
+
+This is a read-only calculated target. No supported BMS register/coil for enabling weather-dependent control or changing its curve/setpoints has yet been documented or commissioned for this installation.
 
 ## Read-only boundary
 
