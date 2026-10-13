@@ -23,9 +23,10 @@ def poll_once(client, unit_id: int, publisher, excluded: set[str] | None = None,
         raise RuntimeError("Modbus control-state or weather-dependent register read failed")
     values = decode_registers(response.registers) | decode_runtime_states(coil_response.bits)
     raw_weather_temperature = weather_response.registers[0]
+    # This target is stored as whole °C (unlike registers 118–131).
     values["weather_dependent_temperature"] = (
         raw_weather_temperature - 65536 if raw_weather_temperature >= 32768 else raw_weather_temperature
-    ) / 10
+    )
     mode_values = {1: "heat", 2: "hot_water", 4: "heat_and_hot_water"}
     operation = operation_response.registers[0]
     values.update({

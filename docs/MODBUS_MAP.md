@@ -40,7 +40,7 @@ The first implementation reads the contiguous range **117–136** with Modbus fu
 | 134 | `debug_time_hours` | Debug time | unsigned integer, hours | Diagnostic feature. |
 | 135 | — | Disinfection | enum | Intentionally excluded: unused at this installation. |
 | 136 | `floor_debug_error_time_seconds` | Error time for floor debug | unsigned integer, seconds | Diagnostic feature. |
-| 137 | `weather_dependent_temperature` | T-weather depend | signed 16-bit ÷ 10, °C | Weather-dependent **target** temperature; verified live as register 137 but not yet included in the initial contiguous 117–136 poll. |
+| 137 | `weather_dependent_temperature` | T-weather depend | signed 16-bit integer, °C | Weather-dependent **target** temperature; the live controller value `47` matches its 47 °C display (no ÷ 10 scaling). |
 
 ## TUV / space-heating distinction
 
@@ -54,7 +54,7 @@ Combined configured modes may still prioritize either heating or DHW. Therefore 
 
 ## Weather-dependent target
 
-The operation manual identifies `T-weather depend` as the calculated target temperature shown in the controller's parameter view; in Czech heating terminology this is the **ekvitermní cílová teplota**. It applies for cooling/heating operation, not pure hot-water operation. The live read-only probe returned raw `40`, decoded as `4.0 °C`, while the unit was off. The service polls this register separately and publishes it as `sensor.heat_pump_weather_dependent_temperature`. Confirm the displayed value during active heating before relying on it for dashboards/automations.
+The operation manual identifies `T-weather depend` as the calculated target temperature shown in the controller's parameter view; in Czech heating terminology this is the **ekvitermní cílová teplota**. It applies for cooling/heating operation, not pure hot-water operation. A live controller comparison verified raw register value `47` against the display's `47 °C`; unlike the ordinary temperature registers, this field is a whole signed °C value and must **not** be divided by 10. The service polls it separately and publishes it as `sensor.heat_pump_weather_dependent_temperature`.
 
 This is a calculated target. The BMS protocol documents writable/readable coil `22` (`Weather depend`) for enabling or disabling weather-dependent control; Home Assistant exposes it as `switch.heat_pump_weather_dependent_control` (display name **Weather-Compensated Control**) and confirms commands by delayed coil read-back. The protocol mapping for the heating curve/setpoints themselves and the TUV setpoint is still not represented in this service.
 
